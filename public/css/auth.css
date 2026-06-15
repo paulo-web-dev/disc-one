@@ -1,0 +1,99 @@
+/* =============================================================
+   DISC.ONE — Auth (login, registro, painel pós-login)
+   Usa os tokens do foundation.css.
+   ============================================================= */
+
+.auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s-7);
+    background: var(--grad-vignette), var(--bg-0);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: var(--s-8);
+}
+
+.auth-card .brand-lockup {
+    justify-content: center;
+    margin-bottom: var(--s-6);
+}
+
+.auth-head {
+    text-align: center;
+    margin-bottom: var(--s-6);
+}
+.auth-head h1 { font-size: 24px; }
+.auth-head p { color: var(--fg-3); margin-top: var(--s-2); font-size: 14px; }
+
+.field { margin-bottom: var(--s-5); }
+.field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-2);
+    margin-bottom: var(--s-2);
+}
+.field input {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--fg-1);
+    background: var(--bg-3);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-md);
+    transition: border-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+}
+.field input::placeholder { color: var(--fg-4); }
+.field input:focus {
+    outline: none;
+    border-color: var(--line-3);
+    box-shadow: var(--glow-soft);
+}
+.field .err {
+    display: block;
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.auth-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--s-5);
+    font-size: 13px;
+}
+.checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg-3);
+    cursor: pointer;
+    user-select: none;
+}
+.checkbox-row input { width: 16px; height: 16px; accent-color: var(--brand-500); }
+
+.auth-foot {
+    text-align: center;
+    margin-top: var(--s-6);
+    font-size: 14px;
+    color: var(--fg-3);
+}
+.auth-foot a { color: var(--brand-300); font-weight: 600; }
+
+.auth-status {
+    background: var(--disc-s-soft);
+    color: var(--success);
+    border: 1px solid rgba(43, 217, 161, 0.30);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: var(--s-5);
+    text-align: center;
+}
