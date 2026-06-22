@@ -10,6 +10,10 @@ class Test extends Model
 {
     protected $fillable = [
         'user_id',
+        'consultant_id',
+        'respondent_name',
+        'respondent_email',
+        'respondent_phone',
         'status',
         'score_d', 'score_i', 'score_s', 'score_c',
         'percent_d', 'percent_i', 'percent_s', 'percent_c',
@@ -34,6 +38,12 @@ class Test extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Consultor que trouxe este respondente (via link de referral). */
+    public function consultant(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'consultant_id');
     }
 
     /**

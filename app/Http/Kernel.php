@@ -65,5 +65,6 @@ class Kernel extends HttpKernel
 
         // DISC ONE — restringe rotas a administradores
         'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+        'consultant' => \App\Http\Middleware\EnsureUserIsConsultant::class,
     ];
 }

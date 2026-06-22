@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .det-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
-    .det-id .av-lg { width: 64px; height: 64px; border-radius: 16px; background: var(--grad-brand-soft); border: 1px solid var(--line-3); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--brand-200); }
+    .det-id .av-lg { width: 64px; height: 64px; border-radius: 16px; background: var(--grad-brand-soft); border: 1px solid var(--line-3); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--brand-600); }
     .det-row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-1); font-size: 14px; }
     .det-row:last-child { border-bottom: none; }
     .det-row .k { color: var(--fg-4); }
@@ -13,7 +13,7 @@
     .det-scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
     .det-score { text-align: center; padding: 14px 8px; background: var(--bg-1); border: 1px solid var(--line-1); border-radius: var(--r-md); }
     .det-score .pf { font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
-    .det-score .pc { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .det-score .pc { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--fg-1); margin-top: 2px; }
     .det-score .pt { font-size: 11px; color: var(--fg-4); }
     @media (max-width: 860px) { .det-grid { grid-template-columns: 1fr; } }
 </style>
@@ -22,7 +22,7 @@
 @section('content')
 <div class="adm-page-head">
     <div>
-        <span class="eyebrow"><a href="{{ route('admin.respondents') }}" style="color: var(--brand-300);">← Respondentes</a></span>
+        <span class="eyebrow"><a href="{{ route('admin.respondents') }}" style="color: var(--brand-600);">← Respondentes</a></span>
         <h1>{{ $user->name }}</h1>
         <p>{{ $user->email }}</p>
     </div>
@@ -61,10 +61,10 @@
             <div style="width: 100%; height: 240px;"><canvas id="detChart"></canvas></div>
 
             <div class="det-scores">
-                <div class="det-score"><div class="pf" style="color:#FF5470;">D</div><div class="pc">{{ round($latest->percent_d) }}%</div><div class="pt">{{ $latest->score_d }} pts</div></div>
-                <div class="det-score"><div class="pf" style="color:#FFB547;">I</div><div class="pc">{{ round($latest->percent_i) }}%</div><div class="pt">{{ $latest->score_i }} pts</div></div>
-                <div class="det-score"><div class="pf" style="color:#2BD9A1;">S</div><div class="pc">{{ round($latest->percent_s) }}%</div><div class="pt">{{ $latest->score_s }} pts</div></div>
-                <div class="det-score"><div class="pf" style="color:#6E8BFF;">C</div><div class="pc">{{ round($latest->percent_c) }}%</div><div class="pt">{{ $latest->score_c }} pts</div></div>
+                <div class="det-score"><div class="pf" style="color:#2F66A8;">D</div><div class="pc">{{ round($latest->percent_d) }}%</div><div class="pt">{{ $latest->score_d }} pts</div></div>
+                <div class="det-score"><div class="pf" style="color:#18A878;">I</div><div class="pc">{{ round($latest->percent_i) }}%</div><div class="pt">{{ $latest->score_i }} pts</div></div>
+                <div class="det-score"><div class="pf" style="color:#6E9BD0;">S</div><div class="pc">{{ round($latest->percent_s) }}%</div><div class="pt">{{ $latest->score_s }} pts</div></div>
+                <div class="det-score"><div class="pf" style="color:#4FA3C4;">C</div><div class="pc">{{ round($latest->percent_c) }}%</div><div class="pt">{{ $latest->score_c }} pts</div></div>
             </div>
 
             <p style="color: var(--fg-3); font-size: 14px; margin-top: 18px; line-height: 1.6;">{{ $profile['tagline'] }}</p>
@@ -122,7 +122,7 @@
             labels: ['D', 'I', 'S', 'C'],
             datasets: [{
                 data: [{{ $latest->percent_d }}, {{ $latest->percent_i }}, {{ $latest->percent_s }}, {{ $latest->percent_c }}],
-                backgroundColor: ['#FF5470', '#FFB547', '#2BD9A1', '#6E8BFF'],
+                backgroundColor: ['#2F66A8', '#18A878', '#6E9BD0', '#4FA3C4'],
                 borderRadius: 8,
                 maxBarThickness: 56
             }]
@@ -131,8 +131,8 @@
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, max: 100, ticks: { color: '#8b93a7', callback: (v) => v + '%' }, grid: { color: 'rgba(255,255,255,0.06)' } },
-                x: { ticks: { color: '#c7ccd8', font: { size: 14, weight: '600' } }, grid: { display: false } }
+                y: { beginAtZero: true, max: 100, ticks: { color: '#5A6473', callback: (v) => v + '%' }, grid: { color: 'rgba(40,60,90,0.08)' } },
+                x: { ticks: { color: '#3D4654', font: { size: 14, weight: '600' } }, grid: { display: false } }
             }
         }
     });

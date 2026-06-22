@@ -2,43 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TestCompletedMail;
 use App\Models\Question;
 use App\Models\Test;
 use App\Models\TestAnswer;
+use App\Models\User;
 use App\Services\DiscCalculatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class TestController extends Controller
 {
     private const TOTAL_QUESTIONS = 24;
 
-    /** Tela de início (instruções). */
+    /** Tela de início: instruções + identificação (nome + e-mail), sem login. */
     public function intro()
     {
-        $hasPending = auth()->user()->tests()->where('status', 'pending')->exists();
-
-        return view('test.intro', compact('hasPending'));
+        return view('test.intro');
     }
 
-    /** Cria (ou retoma) um teste e leva à primeira pergunta não respondida. */
-    public function start()
+    /** Cria um teste (sem conta) com nome + e-mail e leva à primeira pergunta. */
+    public function start(Request $request)
     {
-        $user = auth()->user();
+        $data = $request->validate([
+            'respondent_name'  => ['required', 'string', 'max:255'],
+            'respondent_email' => ['required', 'email', 'max:255'],
+            'respondent_phone' => ['required', 'string', 'max:20'],
+        ], [], [
+            'respondent_name'  => 'nome',
+            'respondent_email' => 'e-mail',
+            'respondent_phone' => 'celular',
+        ]);
 
-        $test = $user->tests()->where('status', 'pending')->latest()->first()
-            ?? $user->tests()->create([
-                'status' => 'pending',
-                'started_at' => now(),
-            ]);
+        $test = Test::create([
+            'respondent_name'  => $data['respondent_name'],
+            'respondent_email' => $data['respondent_email'],
+            'respondent_phone' => $data['respondent_phone'],
+            'consultant_id'    => $this->resolveConsultantId($request),
+            'status'           => 'pending',
+            'started_at'       => now(),
+        ]);
 
-        return redirect()->route('test.question', [$test, $this->firstUnansweredNumber($test)]);
+        return redirect()->route('test.question', [$test, 1]);
     }
 
     /** Exibe uma pergunta: 4 frases embaralhadas + ordenação 1-4. */
     public function question(Test $test, $n)
     {
-        $this->authorizeTest($test);
         if ($test->status === 'completed') {
             return redirect()->route('test.result', $test);
         }
@@ -71,7 +83,6 @@ class TestController extends Controller
     /** Salva a ordenação de uma pergunta e avança (ou finaliza na última). */
     public function saveAnswer(Request $request, Test $test, $n)
     {
-        $this->authorizeTest($test);
         if ($test->status === 'completed') {
             return redirect()->route('test.result', $test);
         }
@@ -129,7 +140,6 @@ class TestController extends Controller
     /** Tela de resultado: gráfico + perfil dominante. */
     public function result(Test $test)
     {
-        $this->authorizeTest($test);
 
         // Se ainda não foi concluído, volta pro fluxo.
         if ($test->status !== 'completed') {
@@ -167,12 +177,43 @@ class TestController extends Controller
 
         app(DiscCalculatorService::class)->calculate($test);
 
+        $this->sendCompletionEmail($test);
+
         return redirect()->route('test.result', $test);
     }
 
-    private function authorizeTest(Test $test): void
+    /** Lê o cookie de referral e devolve o id do consultor, se válido. */
+    private function resolveConsultantId(Request $request): ?int
     {
-        abort_unless($test->user_id === auth()->id(), 403);
+        $ref = $request->cookie('ref');
+
+        if (! $ref) {
+            return null;
+        }
+
+        $isConsultant = User::where('id', $ref)->where('role', 'consultant')->exists();
+
+        return $isConsultant ? (int) $ref : null;
+    }
+
+    /** Envia o e-mail de agradecimento com o link do relatório básico. */
+    private function sendCompletionEmail(Test $test): void
+    {
+        $email = $test->respondent_email ?? optional($test->user)->email;
+
+        if (! $email) {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new TestCompletedMail($test));
+        } catch (\Throwable $e) {
+            // Um erro de SMTP não pode quebrar o fluxo do respondente.
+            Log::error('Falha ao enviar e-mail de conclusão do teste', [
+                'test_id' => $test->id,
+                'erro' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function clampQuestion(int $n): int

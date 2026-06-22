@@ -1,46 +1,59 @@
-@extends('layouts.admin')
+@extends('layouts.consultant')
 
-@section('title', 'Respondentes')
+@section('title', 'Meus respondentes')
 
 @section('content')
 <div class="adm-page-head">
     <div>
-        <span class="eyebrow">Gestão</span>
-        <h1>Respondentes</h1>
-        <p>{{ $respondents->total() }} resposta(s) · quem respondeu, perfil, situação e o consultor que trouxe.</p>
+        <span class="eyebrow">Minha área</span>
+        <h1>Olá, {{ $consultant->name }}</h1>
+        <p>Compartilhe seu link e acompanhe quem respondeu o DISC por ele.</p>
     </div>
 </div>
 
-<div class="tbl-wrap">
-    <div class="tbl-toolbar">
-        <form method="GET" action="{{ route('admin.respondents') }}" style="display: flex; gap: 10px; flex: 1; flex-wrap: wrap;">
-            <input type="text" name="q" value="{{ $q }}" placeholder="Buscar nome, e-mail ou telefone… (Enter para filtrar)" style="flex: 1; min-width: 200px;">
-            <select name="consultant" onchange="this.form.submit()" style="max-width: 240px;">
-                <option value="">Todos os consultores</option>
-                @foreach ($consultants as $c)
-                    <option value="{{ $c->id }}" {{ (string) $consultantId === (string) $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
-                @endforeach
-            </select>
-        </form>
-        @if ($q !== '' || $consultantId)
-            <a href="{{ route('admin.respondents') }}" class="fchip">Limpar filtros</a>
-        @endif
+{{-- Link de divulgação --}}
+<div class="panel" style="margin-bottom: 16px;">
+    <div class="panel-head">
+        <div><h3 style="font-size: 16px;">Seu link de divulgação</h3><div class="sub">Envie este link — quem responder por ele aparece aqui.</div></div>
     </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px;">
+        <code class="mono" style="flex: 1; min-width: 240px; font-size: 13px; color: var(--brand-700); background: var(--brand-50); padding: 12px 14px; border-radius: var(--r-md); border: 1px solid var(--brand-100); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $consultant->referralUrl() }}</code>
+        <button type="button" class="btn btn-primary"
+                onclick="navigator.clipboard.writeText('{{ $consultant->referralUrl() }}'); this.textContent='Copiado!'; setTimeout(() => this.textContent='Copiar link', 1500)">Copiar link</button>
+    </div>
+</div>
 
+{{-- KPIs --}}
+<div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="kpi">
+        <div class="top"><div class="ic" style="background: rgba(46,115,184,0.12); color: var(--brand-600);">👥</div></div>
+        <div class="label">Respondentes</div>
+        <div class="value">{{ $stats['total'] }}</div>
+        <div class="sub">vieram pelo seu link</div>
+    </div>
+    <div class="kpi">
+        <div class="top"><div class="ic" style="background: rgba(24,168,120,0.12); color: var(--disc-s);">✓</div></div>
+        <div class="label">Concluídos</div>
+        <div class="value">{{ $stats['completed'] }}</div>
+        <div class="sub">testes finalizados</div>
+    </div>
+</div>
+
+{{-- Tabela --}}
+<div class="tbl-wrap" style="margin-top: 16px;">
     <div style="overflow-x: auto;">
         <table class="tbl">
             <thead>
                 <tr>
                     <th>Respondente</th>
                     <th>Telefone</th>
-                    <th>Consultor</th>
                     <th>Perfil</th>
                     <th>Situação</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($respondents as $r)
+                @forelse ($tests as $r)
                     @php
                         $prof = $r->status === 'completed' && $r->dominant_profile
                             ? config('disc_profiles.'.$r->dominant_profile) : null;
@@ -59,13 +72,6 @@
                             </div>
                         </td>
                         <td class="mono-cell">{{ $r->respondent_phone ?: '—' }}</td>
-                        <td>
-                            @if ($r->consultant)
-                                <span style="font-size: 14px; color: var(--fg-1);">{{ $r->consultant->name }}</span>
-                            @else
-                                <span style="color: var(--fg-4);">— direto</span>
-                            @endif
-                        </td>
                         <td>
                             @if ($prof)
                                 <span class="disc-badge" style="background: {{ $prof['hex'] }}1A; color: {{ $prof['hex'] }};">
@@ -90,7 +96,9 @@
                         <td style="text-align: right; white-space: nowrap;">
                             @if ($r->status === 'completed')
                                 <a href="{{ route('disc.resultDocumento', ['id' => $r->id]) }}" target="_blank" class="btn btn-ghost" style="padding: 6px 12px; font-size: 13px;">Ver básico</a>
-                                <a href="{{ route('disc.resultDocumentoPremium', ['id' => $r->id]) }}" target="_blank" class="btn btn-ghost" style="padding: 6px 12px; font-size: 13px;">Ver premium</a>
+                                @if ($isPremium)
+                                    <a href="{{ route('disc.resultDocumentoPremium', ['id' => $r->id]) }}" target="_blank" class="btn btn-ghost" style="padding: 6px 12px; font-size: 13px;">Ver premium</a>
+                                @endif
                             @else
                                 <span style="color: var(--fg-4); font-size: 13px;">—</span>
                             @endif
@@ -98,8 +106,8 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--fg-4);">
-                            Nenhum respondente encontrado.
+                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--fg-4);">
+                            Ninguém respondeu pelo seu link ainda. Compartilhe-o para começar!
                         </td>
                     </tr>
                 @endforelse
@@ -108,11 +116,11 @@
     </div>
 
     <div class="tbl-foot">
-        <span>Mostrando {{ $respondents->count() }} de {{ $respondents->total() }} respostas</span>
+        <span>Mostrando {{ $tests->count() }} de {{ $tests->total() }} respondentes</span>
         <div class="pager">
-            <button onclick="location.href='{{ $respondents->previousPageUrl() }}'" {{ $respondents->onFirstPage() ? 'disabled' : '' }}>‹</button>
-            <button class="on">{{ $respondents->currentPage() }} / {{ $respondents->lastPage() }}</button>
-            <button onclick="location.href='{{ $respondents->nextPageUrl() }}'" {{ $respondents->hasMorePages() ? '' : 'disabled' }}>›</button>
+            <button onclick="location.href='{{ $tests->previousPageUrl() }}'" {{ $tests->onFirstPage() ? 'disabled' : '' }}>‹</button>
+            <button class="on">{{ $tests->currentPage() }} / {{ $tests->lastPage() }}</button>
+            <button onclick="location.href='{{ $tests->nextPageUrl() }}'" {{ $tests->hasMorePages() ? '' : 'disabled' }}>›</button>
         </div>
     </div>
 </div>

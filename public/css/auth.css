@@ -52,7 +52,7 @@
 .field input::placeholder { color: var(--fg-4); }
 .field input:focus {
     outline: none;
-    border-color: var(--line-3);
+    border-color: var(--brand-400);
     box-shadow: var(--glow-soft);
 }
 .field .err {
@@ -85,12 +85,12 @@
     font-size: 14px;
     color: var(--fg-3);
 }
-.auth-foot a { color: var(--brand-300); font-weight: 600; }
+.auth-foot a { color: var(--brand-600); font-weight: 600; }
 
 .auth-status {
     background: var(--disc-s-soft);
     color: var(--success);
-    border: 1px solid rgba(43, 217, 161, 0.30);
+    border: 1px solid rgba(24, 168, 120, 0.30);
     border-radius: var(--r-md);
     padding: 10px 14px;
     font-size: 14px;

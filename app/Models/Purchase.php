@@ -13,6 +13,9 @@ class Purchase extends Model
         'test_id',
         'amount',
         'status',
+        'asaas_customer_id',
+        'asaas_payment_id',
+        'invoice_url',
         'payment_method',
         'paid_at',
     ];

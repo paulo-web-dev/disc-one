@@ -13,7 +13,7 @@ return [
         'letter' => 'D',
         'name' => 'Dominante',
         'archetype' => 'O Executor',
-        'hex' => '#FF5470',
+        'hex' => '#2F66A8',
         'tagline' => 'Movido por resultados, decisão e desafio. Você assume o comando e faz as coisas acontecerem.',
         'traits' => [
             'Decidido e direto',
@@ -59,7 +59,7 @@ return [
         'letter' => 'I',
         'name' => 'Influente',
         'archetype' => 'O Comunicador',
-        'hex' => '#FFB547',
+        'hex' => '#18A878',
         'tagline' => 'Movido por pessoas, entusiasmo e reconhecimento. Você inspira, conecta e contagia com energia.',
         'traits' => [
             'Comunicativo e expressivo',
@@ -105,7 +105,7 @@ return [
         'letter' => 'S',
         'name' => 'Estável',
         'archetype' => 'O Apoiador',
-        'hex' => '#2BD9A1',
+        'hex' => '#6E9BD0',
         'tagline' => 'Movido por harmonia, cooperação e segurança. Você é o alicerce confiável que mantém tudo de pé.',
         'traits' => [
             'Paciente e constante',
@@ -151,7 +151,7 @@ return [
         'letter' => 'C',
         'name' => 'Conforme',
         'archetype' => 'O Analista',
-        'hex' => '#6E8BFF',
+        'hex' => '#4FA3C4',
         'tagline' => 'Movido por precisão, qualidade e lógica. Você garante que tudo seja feito do jeito certo.',
         'traits' => [
             'Analítico e preciso',

@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'asaas' => [
+        'key' => env('ASAAS_API_KEY'),
+        'base_url' => env('ASAAS_BASE_URL', 'https://api-sandbox.asaas.com/v3'),
+        'price' => (float) env('ASAAS_PREMIUM_PRICE', 49.00),
+    ],
+
 ];

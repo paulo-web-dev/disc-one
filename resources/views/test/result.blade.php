@@ -7,7 +7,7 @@
 <style>
     .res-breakdown { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line-1); width: 100%; }
     .res-breakdown .it { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--fg-2); }
-    .res-breakdown .it b { font-family: var(--font-mono); color: #fff; }
+    .res-breakdown .it b { font-family: var(--font-mono); color: var(--fg-1); }
     .chart-card h3 { font-family: var(--font-display); font-size: 16px; color: var(--fg-2); align-self: flex-start; margin-bottom: 14px; }
     .trait .ck { font-weight: 800; font-size: 13px; }
     .offer-note { text-align: center; color: var(--fg-4); font-size: 12px; margin-top: 10px; }
@@ -86,10 +86,9 @@
                     <span class="price-old">R$ 97</span>
                     <div class="price">R$ 49</div>
                     <div class="price-note">pagamento único · PDF para download</div>
-                    <button type="button" class="btn btn-primary btn-lg btn-block"
-                            onclick="alert('Checkout e geração do PDF chegam nas Etapas 8 e 9.');">
-                        Baixar relatório completo
-                    </button>
+                    <a href="{{ route('disc.checkout', ['test' => $test->id]) }}" class="btn btn-primary btn-lg btn-block">
+                        Liberar relatório completo
+                    </a>
                     <p class="offer-note">O teste e este resultado são gratuitos. O pagamento libera só o PDF.</p>
                 </div>
             </div>
@@ -116,7 +115,7 @@
                     {{ $test->percent_s }},
                     {{ $test->percent_c }}
                 ],
-                backgroundColor: ['#FF5470', '#FFB547', '#2BD9A1', '#6E8BFF'],
+                backgroundColor: ['#2F66A8', '#18A878', '#6E9BD0', '#4FA3C4'],
                 borderRadius: 8,
                 maxBarThickness: 64
             }]
@@ -129,11 +128,11 @@
                 y: {
                     beginAtZero: true,
                     max: 100,
-                    ticks: { color: '#8b93a7', callback: (v) => v + '%' },
-                    grid: { color: 'rgba(255,255,255,0.06)' }
+                    ticks: { color: '#5A6473', callback: (v) => v + '%' },
+                    grid: { color: 'rgba(40,60,90,0.08)' }
                 },
                 x: {
-                    ticks: { color: '#c7ccd8', font: { size: 14, weight: '600' } },
+                    ticks: { color: '#3D4654', font: { size: 14, weight: '600' } },
                     grid: { display: false }
                 }
             }

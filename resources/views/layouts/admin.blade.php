@@ -37,9 +37,14 @@
             <span>Dashboard</span>
         </a>
 
-        <a href="{{ route('admin.respondents') }}" class="adm-nav {{ request()->routeIs('admin.respondents') || request()->routeIs('admin.respondent.show') ? 'active' : '' }}">
+        <a href="{{ route('admin.respondents') }}" class="adm-nav {{ request()->routeIs('admin.respondents') ? 'active' : '' }}">
             <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Respondentes</span>
+        </a>
+
+        <a href="{{ route('admin.consultants') }}" class="adm-nav {{ request()->routeIs('admin.consultants*') ? 'active' : '' }}">
+            <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            <span>Consultores</span>
         </a>
 
         <a href="{{ route('admin.purchases') }}" class="adm-nav {{ request()->routeIs('admin.purchases') ? 'active' : '' }}">
@@ -57,7 +62,7 @@
         <div class="adm-upgrade">
             <div class="h">Ver a plataforma</div>
             <div class="p">Abra o funil do usuário para testar a jornada de ponta a ponta.</div>
-            <a href="{{ route('dashboard') }}" class="btn btn-secondary btn-block" style="font-size: 13px; padding: 9px 14px;">Abrir funil</a>
+            <a href="{{ url('/') }}" class="btn btn-secondary btn-block" style="font-size: 13px; padding: 9px 14px;">Abrir funil</a>
         </div>
 
         <div class="side-foot">
@@ -89,7 +94,7 @@
 
         <div class="adm-scroll">
             @if (session('success'))
-                <div style="margin-bottom: 20px; padding: 12px 16px; background: rgba(43,217,161,0.1); border: 1px solid rgba(43,217,161,0.3); border-radius: var(--r-md); color: var(--success); font-size: 14px;">{{ session('success') }}</div>
+                <div style="margin-bottom: 20px; padding: 12px 16px; background: rgba(24,168,120,0.1); border: 1px solid rgba(24,168,120,0.3); border-radius: var(--r-md); color: var(--success); font-size: 14px;">{{ session('success') }}</div>
             @endif
             @yield('content')
         </div>

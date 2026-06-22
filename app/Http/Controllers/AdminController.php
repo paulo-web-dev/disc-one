@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\Test;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -16,7 +17,12 @@ class AdminController extends Controller
         $totalTests = Test::count();
         $completed = Test::where('status', 'completed')->count();
         $pending = Test::where('status', 'pending')->count();
-        $respondents = User::where('role', 'respondent')->count();
+
+        // Respondentes reais = pessoas distintas que responderam (por e-mail).
+        $respondents = Test::whereNotNull('respondent_email')
+            ->distinct('respondent_email')
+            ->count('respondent_email');
+
         $revenue = (float) Purchase::where('status', 'paid')->sum('amount');
 
         $counts = Test::where('status', 'completed')
@@ -37,33 +43,28 @@ class AdminController extends Controller
         ));
     }
 
-    /** Lista de respondentes: quem respondeu e quem não respondeu. */
+    /** Lista de respondentes (testes): nome, e-mail, celular, perfil, situação e consultor. */
     public function respondents()
     {
         $q = trim((string) request('q'));
+        $consultantId = request('consultant');
 
-        $respondents = User::where('role', 'respondent')
-            ->when($q !== '', fn ($query) => $query->where(
-                fn ($w) => $w->where('name', 'like', "%{$q}%")->orWhere('email', 'like', "%{$q}%")
+        $respondents = Test::query()
+            ->with('consultant')
+            ->withCount(['purchases as paid_purchases_count' => fn ($p) => $p->where('status', 'paid')])
+            ->when($q !== '', fn ($query) => $query->where(fn ($w) =>
+                $w->where('respondent_name', 'like', "%{$q}%")
+                    ->orWhere('respondent_email', 'like', "%{$q}%")
+                    ->orWhere('respondent_phone', 'like', "%{$q}%")
             ))
-            ->with(['tests' => fn ($t) => $t->where('status', 'completed')->orderByDesc('completed_at')])
+            ->when($consultantId, fn ($query) => $query->where('consultant_id', $consultantId))
             ->orderByDesc('created_at')
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.respondentes', compact('respondents', 'q'));
-    }
+        $consultants = User::where('role', 'consultant')->orderBy('name')->get();
 
-    /** Detalhe de um respondente: resultado, gráfico e data. */
-    public function showRespondent(User $user)
-    {
-        $tests = $user->tests()->orderByDesc('created_at')->get();
-        $latest = $tests->firstWhere('status', 'completed');
-        $profile = $latest && $latest->dominant_profile
-            ? config('disc_profiles.'.$latest->dominant_profile)
-            : null;
-
-        return view('admin.respondente', compact('user', 'tests', 'latest', 'profile'));
+        return view('admin.respondentes', compact('respondents', 'q', 'consultants', 'consultantId'));
     }
 
     /** Gestão de compras/pagamentos: quem comprou, status. */
@@ -77,10 +78,19 @@ class AdminController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $revenue = (float) Purchase::where('status', 'paid')->sum('amount');
+        $paid = Purchase::where('status', 'paid')->count();
+
         $stats = [
-            'revenue' => (float) Purchase::where('status', 'paid')->sum('amount'),
-            'paid' => Purchase::where('status', 'paid')->count(),
+            'revenue' => $revenue,
+            'revenue_month' => (float) Purchase::where('status', 'paid')
+                ->whereMonth('paid_at', now()->month)
+                ->whereYear('paid_at', now()->year)
+                ->sum('amount'),
+            'paid' => $paid,
             'pending' => Purchase::where('status', 'pending')->count(),
+            'pending_value' => (float) Purchase::where('status', 'pending')->sum('amount'),
+            'avg_ticket' => $paid > 0 ? $revenue / $paid : 0.0,
         ];
 
         return view('admin.vendas', compact('purchases', 'stats', 'status'));
@@ -97,7 +107,7 @@ class AdminController extends Controller
     /** Editar uma pergunta (as 4 frases + ativa). */
     public function editQuestion(Question $question)
     {
-        $phrases = $question->phrases->keyBy('dimension'); // ['D'=>..., 'I'=>..., 'S'=>..., 'C'=>...]
+        $phrases = $question->phrases->keyBy('dimension');
 
         return view('admin.pergunta-editar', compact('question', 'phrases'));
     }
@@ -125,5 +135,90 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.questions')
             ->with('success', "Pergunta {$question->number} atualizada.");
+    }
+
+    // ============================================================
+    // Consultores / Divulgadores (CRUD)
+    // ============================================================
+
+    /** Lista de consultores com link de referral e total de respondentes. */
+    public function consultants()
+    {
+        $consultants = User::where('role', 'consultant')
+            ->withCount('referredTests')
+            ->orderByDesc('created_at')
+            ->paginate(15);
+
+        return view('admin.consultores.index', compact('consultants'));
+    }
+
+    /** Formulário de novo consultor. */
+    public function createConsultant()
+    {
+        return view('admin.consultores.form', ['consultant' => new User()]);
+    }
+
+    /** Cria um consultor. */
+    public function storeConsultant(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6'],
+            'referral_code' => ['nullable', 'string', 'max:40', 'alpha_dash', 'unique:users,referral_code'],
+        ]);
+
+        User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'], // o cast "hashed" faz o hash
+            'role' => 'consultant',
+            'referral_code' => $data['referral_code'] ?: User::generateReferralCode(),
+        ]);
+
+        return redirect()->route('admin.consultants')->with('success', 'Consultor criado com sucesso.');
+    }
+
+    /** Formulário de edição. */
+    public function editConsultant(User $consultant)
+    {
+        abort_unless($consultant->role === 'consultant', 404);
+
+        return view('admin.consultores.form', compact('consultant'));
+    }
+
+    /** Atualiza um consultor. */
+    public function updateConsultant(Request $request, User $consultant)
+    {
+        abort_unless($consultant->role === 'consultant', 404);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($consultant->id)],
+            'password' => ['nullable', 'string', 'min:6'],
+            'referral_code' => ['required', 'string', 'max:40', 'alpha_dash', Rule::unique('users', 'referral_code')->ignore($consultant->id)],
+        ]);
+
+        $consultant->name = $data['name'];
+        $consultant->email = $data['email'];
+        $consultant->referral_code = $data['referral_code'];
+
+        if (! empty($data['password'])) {
+            $consultant->password = $data['password'];
+        }
+
+        $consultant->save();
+
+        return redirect()->route('admin.consultants')->with('success', 'Consultor atualizado.');
+    }
+
+    /** Remove um consultor (os respondentes dele continuam, sem vínculo). */
+    public function destroyConsultant(User $consultant)
+    {
+        abort_unless($consultant->role === 'consultant', 404);
+
+        $consultant->delete();
+
+        return redirect()->route('admin.consultants')->with('success', 'Consultor removido.');
     }
 }

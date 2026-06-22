@@ -27,7 +27,7 @@
             </div>
 
             @error('order')
-                <div class="auth-status" style="background: var(--disc-d-soft); color: var(--danger); border-color: rgba(255,84,112,0.3);">
+                <div class="auth-status" style="background: var(--disc-d-soft); color: var(--danger); border-color: rgba(224,85,106,0.3);">
                     {{ $message }}
                 </div>
             @enderror

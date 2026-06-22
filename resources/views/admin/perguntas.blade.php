@@ -3,7 +3,7 @@
 @section('title', 'Perguntas')
 
 @php
-    $colors = ['D' => '#FF5470', 'I' => '#FFB547', 'S' => '#2BD9A1', 'C' => '#6E8BFF'];
+    $colors = ['D' => '#2F66A8', 'I' => '#18A878', 'S' => '#6E9BD0', 'C' => '#4FA3C4'];
     $labels = ['D' => 'Dominância', 'I' => 'Influência', 'S' => 'Estabilidade', 'C' => 'Conformidade'];
 @endphp
 
