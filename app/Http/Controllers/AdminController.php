@@ -67,7 +67,7 @@ class AdminController extends Controller
         return view('admin.respondentes', compact('respondents', 'q', 'consultants', 'consultantId'));
     }
 
-    /** Gestão de compras/pagamentos: quem comprou, status. */
+    /** Relatório financeiro: compras, status e KPIs. */
     public function purchases()
     {
         $status = request('status');
@@ -96,7 +96,7 @@ class AdminController extends Controller
         return view('admin.vendas', compact('purchases', 'stats', 'status'));
     }
 
-    /** Gestão de perguntas: visualizar as 24. */
+    /** Gestão de perguntas: as 24, com as 4 frases (D/I/S/C) de cada. */
     public function questions()
     {
         $questions = Question::with('phrases')->orderBy('number')->get();
@@ -104,7 +104,7 @@ class AdminController extends Controller
         return view('admin.perguntas', compact('questions'));
     }
 
-    /** Editar uma pergunta (as 4 frases + ativa). */
+    /** Editar uma pergunta (enunciado + 4 frases + ativa). */
     public function editQuestion(Question $question)
     {
         $phrases = $question->phrases->keyBy('dimension');
@@ -116,6 +116,7 @@ class AdminController extends Controller
     public function updateQuestion(Request $request, Question $question)
     {
         $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
             'phrases' => ['required', 'array'],
             'phrases.D' => ['required', 'string', 'max:500'],
             'phrases.I' => ['required', 'string', 'max:500'],
@@ -130,7 +131,10 @@ class AdminController extends Controller
                 ->update(['phrase' => trim($data['phrases'][$dimension])]);
         }
 
-        $question->update(['active' => $request->boolean('active')]);
+        $question->update([
+            'title' => trim($data['title']),
+            'active' => $request->boolean('active'),
+        ]);
 
         return redirect()
             ->route('admin.questions')

@@ -9,6 +9,7 @@ class Question extends Model
 {
     protected $fillable = [
         'number',
+        'title',
         'active',
     ];
 

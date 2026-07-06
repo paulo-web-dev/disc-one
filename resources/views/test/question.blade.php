@@ -22,12 +22,12 @@
         <div class="asmt-stage">
             <div class="q-head">
                 <span class="eyebrow">DISC ONE</span>
-                <h2>Como você se descreve?</h2>
+                <h2>{{ $question->title ?: 'Como você se descreve?' }}</h2>
                 <p>Ordene de <b>1</b> (mais te descreve) a <b>4</b> (menos te descreve). Sem repetir números.</p>
             </div>
 
             @error('order')
-                <div class="auth-status" style="background: var(--disc-d-soft); color: var(--danger); border-color: rgba(224,85,106,0.3);">
+                <div class="auth-status" style="background: var(--disc-d-soft); color: var(--danger); border-color: rgba(255,84,112,0.3);">
                     {{ $message }}
                 </div>
             @enderror
